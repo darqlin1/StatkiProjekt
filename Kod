@@ -1,0 +1,162 @@
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+const int ROZMIAR = 5;
+const int LICZBA_STATKOW = 3;
+
+vector<vector<char>> tworzPlansze() {
+    return vector<vector<char>>(ROZMIAR, vector<char>(ROZMIAR, '.'));
+}
+
+void rysujPlansze(const vector<vector<char>>& plansza, bool ukryjStatki = false) {
+    cout << "  ";
+    for (int i = 0; i < ROZMIAR; ++i) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    for (int i = 0; i < ROZMIAR; ++i) {
+        cout << i << " ";
+        for (int j = 0; j < ROZMIAR; ++j) {
+            if (ukryjStatki && plansza[i][j] == 'S') {
+                cout << ". ";
+            } else {
+                cout << plansza[i][j] << " ";
+            }
+        }
+        cout << endl;
+    }
+}
+
+void ustawStatkiKomputera(vector<vector<char>>& plansza) {
+    int ustawione = 0;
+    while (ustawione < LICZBA_STATKOW) {
+        int wiersz = rand() % ROZMIAR;
+        int kolumna = rand() % ROZMIAR;
+        if (plansza[wiersz][kolumna] == '.') {
+            plansza[wiersz][kolumna] = 'S';
+            ustawione++;
+        }
+    }
+}
+
+void ustawStatkiGracza(vector<vector<char>>& plansza) {
+    int ustawione = 0;
+    while (ustawione < LICZBA_STATKOW) {
+        int wiersz, kolumna;
+        cout << "Podaj pozycje dla statku " << ustawione + 1 << " (wiersz kolumna): ";
+        if (!(cin >> wiersz >> kolumna)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "Niepoprawny format!\n";
+            continue;
+        }
+        
+        if (wiersz >= 0 && wiersz < ROZMIAR && kolumna >= 0 && kolumna < ROZMIAR && plansza[wiersz][kolumna] == '.') {
+            plansza[wiersz][kolumna] = 'S';
+            ustawione++;
+        } else {
+            cout << "Niepoprawne pole lub pole juz zajete!\n";
+        }
+    }
+}
+
+bool turaGracza(vector<vector<char>>& plansza) {
+    int wiersz, kolumna;
+    while (true) {
+        cout << "Podaj wspolrzedne strzalu (wiersz kolumna): ";
+        if (!(cin >> wiersz >> kolumna)) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "Niepoprawny format!\n";
+            continue;
+        }
+        if (wiersz < 0 || wiersz >= ROZMIAR || kolumna < 0 || kolumna >= ROZMIAR) {
+            cout << "Wspolrzedne poza plansza!\n";
+            continue;
+        }
+        if (plansza[wiersz][kolumna] == 'X' || plansza[wiersz][kolumna] == 'M') {
+            cout << "Juz strzelales w to miejsce!\n";
+            continue;
+        }
+        if (plansza[wiersz][kolumna] == 'S') {
+            cout << "TRAFIONY!\n";
+            plansza[wiersz][kolumna] = 'X';
+            return true;
+        } else {
+            cout << "PUDLO!\n";
+            plansza[wiersz][kolumna] = 'M';
+            return false;
+        }
+    }
+}
+
+bool turaKomputera(vector<vector<char>>& plansza) {
+    int wiersz, kolumna;
+    do {
+        wiersz = rand() % ROZMIAR;
+        kolumna = rand() % ROZMIAR;
+    } while (plansza[wiersz][kolumna] == 'X' || plansza[wiersz][kolumna] == 'M');
+
+    cout << "Komputer strzela w: " << wiersz << " " << kolumna << " - ";
+    if (plansza[wiersz][kolumna] == 'S') {
+        cout << "TRAFIL TWOJ STATEK!\n";
+        plansza[wiersz][kolumna] = 'X';
+        return true;
+    } else {
+        cout << "PUDLO!\n";
+        plansza[wiersz][kolumna] = 'M';
+        return false;
+    }
+}
+
+int main() {
+    srand(time(0));
+
+    vector<vector<char>> planszaGracza = tworzPlansze();
+    vector<vector<char>> planszaKomputera = tworzPlansze();
+
+    cout << "--- USTAWIANIE STATKOW GRACZA ---\n";
+    ustawStatkiGracza(planszaGracza);
+    ustawStatkiKomputera(planszaKomputera);
+
+    int statkiKomputera = LICZBA_STATKOW;
+    int statkiGracza = LICZBA_STATKOW;
+
+    while (statkiKomputera > 0 && statkiGracza > 0) {
+        cout << "\n=================================\n";
+        cout << "PLANSZA KOMPUTERA:\n";
+        rysujPlansze(planszaKomputera, true);
+
+        cout << "\nPLANSZA GRACZA:\n";
+        rysujPlansze(planszaGracza, false);
+
+        cout << "\n--- TURA GRACZA ---\n";
+        if (turaGracza(planszaKomputera)) {
+            statkiKomputera--;
+        }
+
+        if (statkiKomputera == 0) {
+            break;
+        }
+
+        cout << "\n--- TURA KOMPUTERA ---\n";
+        if (turaKomputera(planszaGracza)) {
+            statkiGracza--;
+        }
+    }
+
+    cout << "\n=================================\n";
+    if (statkiKomputera == 0) {
+        cout << "WYGRALES! Gratulacje!\n";
+    } else {
+        cout << "PRZEGRALES! Komputer zatopil wszystkie Twoje statki.\n";
+    }
+
+    return 0;
+}
+
