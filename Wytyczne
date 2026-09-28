@@ -1,0 +1,86 @@
+Projekt informatyczny 1 
+
+“Gra w statki” 
+
+ 
+
+Tytuł: “Gra w staki” 
+
+System: Windows 11 
+
+Język programowania: C++  
+
+IDE: CodeBlocks 
+
+Data rozpoczęcia: 08.09.2026 
+Autor: Oskar Wieczorkowski 
+
+ 
+
+Napisz kod programu ( gra komputerowa w C++ ) oraz wykonaj dokumentację: 
+
+    Opis gry ( zrzuty ekranu ) 
+
+    Działanie gry ( zrzuty ekranu ) 
+
+    Testowanie gry ( zrzuty ekranu ) dowolne narzędzie do wykrywania błędów w aplikach C/C++ 
+
+ 
+
+Przykłady w dokumentacji: Dokumentacja zawiera: nazwa systemu operacyjnego, nazwy środowisk programistycznych, nazwy języków programowania, nazwy emulatora dla aplikacji mobilne. 
+
+Zrzuty ekranu z kryteriów muszą zawierać cały obszar ekranu z widocznym paskiem 
+
+ 
+
+​​ 
+
+​ 
+
+​ 
+
+​​ 
+
+ 
+
+    Cel i opis projektu  
+
+Projekt przedstawia konsolową wersję gry w statki zrealizowaną w języku C++. Aplikacja umożliwia rozgrywkę jednoosobową przeciwko komputerowi na planszy o wymiarach 10x10.  
+
+    Wymagania i środowisko 
+
+Język programowania: C++ 
+
+Biblioteki standardowe: 
+
+    obsługa wejścia/wyjścia (cin, cout) 
+
+    obsługa dynamicznych tablic std::vector 
+
+    generowanie liczb losowych (rand(), srand()) 
+
+    obsługa czasu systemowego (time()) do inicjalizacji generatora losowego 
+
+    Struktura danych  i stałe 
+
+ROZMIAR – stała typu int określająca rozmiar planszy ( 10x10 ) 
+
+LICZBA_STATKOW - stała typu int decydująca o ilości statków każdego z graczy 
+
+ 
+
+Stałe zmienne 
+
+Oznaczenia na planszy: 
+
+    “ . ”  Puste pole (woda / pole zakryte) 
+
+    “ S “ Statek (widoczny tylko na planszy gracza) 
+
+    “ X “ Trafienie (zatopiony statek) 
+
+    “ O ” Pudło (strzał w wodę) 
+
+ 
+
+Plansza w trakcie trwania rozgrywki 
