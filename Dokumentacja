@@ -1,0 +1,72 @@
+Dokumentacja Techniczna: Gra w Statki (C++)
+1. Cel i opis projektu
+Projekt przedstawia konsolową wersję gry w statki zrealizowaną w języku C++. Aplikacja umożliwia rozgrywkę jednoosobową przeciwko komputerowi na planszy o wymiarach 5x5. Kod w całości wykorzystuje polskie nazewnictwo funkcji i zmiennych. Do reprezentacji stanu planszy użyto dwuwymiarowego wektora dynamicznego (std::vector).
+2. Wymagania i środowisko
+ * Język programowania: C++ (standard C++11 lub nowszy)
+ * Biblioteki standardowe:
+   * <iostream> – obsługa wejścia/wyjścia (cin, cout)
+   * <vector> – obsługa dynamicznych tablic std::vector
+   * <cstdlib> – generowanie liczb losowych (rand(), srand())
+   * <ctime> – obsługa czasu systemowego (time()) do inicjalizacji generatora losowego
+3. Struktura danych i stałe
+Stałe globalne
+| Stała | Typ | Wartość | Opis |
+|---|---|---|---|
+| ROZMIAR | const int | 5 | Wymiar kwadratowej planszy (5x5) |
+| LICZBA_STATKOW | const int | 3 | Liczba jednomasztowych statków każdego z graczy |
+Oznaczenia na planszy (char)
+ * . – Puste pole (woda / pole zakryte)
+ * S – Statek (widoczny tylko na planszy gracza)
+ * X – Trafienie (zatopiony statek)
+ * M – Pudło (strzał w wodę)
+4. Opis modułów i funkcji
+Tworzenie i rysowanie planszy
+ * vector<vector<char>> tworzPlansze()
+   * Opis: Tworzy i zwraca dwuwymiarowy wektor o wymiarach ROZMIAR \times ROZMIAR, wypełniony domyślnie znakami kropki '.'.
+ * void rysujPlansze(const vector<vector<char>>& plansza, bool ukryjStatki)
+   * Opis: Rysuje planszę w konsoli wraz z nagłówkami indeksów wierszy i kolumn (0..4).
+   * Parametry:
+     * plansza – stała referencja do planszy (zapobiega niepotrzebnemu kopiowaniu danych).
+     * ukryjStatki – flaga logiczna; gdy wynosi true, zamienia litery 'S' na '.', ukrywając pozycje statków komputera.
+Rozstawianie floty
+ * void ustawStatkiGracza(vector<vector<char>>& plansza)
+   * Opis: Pobiera od użytkownika pozycje dla LICZBA_STATKOW statków. Posiada walidację błędnie wpisanych danych (cin.clear(), cin.ignore()) oraz sprawdza, czy pole nie jest już zajęte.
+ * void ustawStatkiKomputera(vector<vector<char>>& plansza)
+   * Opis: Losuje współrzędne przy użyciu rand() % ROZMIAR i umieszcza statki komputera na wolnych polach.
+Mechanika rozgrywki
+ * bool turaGracza(vector<vector<char>>& plansza)
+   * Opis: Obsługuje ruch gracza. Pobiera współrzędne strzału, sprawdza ich poprawność oraz powtórzenia. W przypadku trafienia zmienia pole na 'X' i zwraca true, przy pudle ustawia 'M' i zwraca false.
+ * bool turaKomputera(vector<vector<char>>& plansza)
+   * Opis: Losuje pole strzału tak długo, aż trafi na pole, w które wcześniej nie strzelał (różne od 'X' i 'M'). Aktualizuje planszę gracza i zwraca wynik strzału.
+5. Algorytm działania programu (main)
+[Start]
+  │
+  ├── 1. Inicjalizacja ziarna losowego: srand(time(0))
+  ├── 2. Utworzenie plansz: planszaGracza i planszaKomputera (tworzPlansze)
+  ├── 3. Rozstawienie floty obu graczy (ustawStatkiGracza, ustawStatkiKomputera)
+  │
+  ├── [Pętla główna: while (statkiKomputera > 0 && statkiGracza > 0)]
+  │     ├── Rysowanie planszy komputera (rysujPlansze z ukryjStatki = true)
+  │     ├── Rysowanie planszy gracza (rysujPlansze z ukryjStatki = false)
+  │     ├── Tura gracza (turaGracza) -> zmniejszenie statkiKomputera przy trafieniu
+  │     ├── Sprawdzenie czy statkiKomputera == 0 -> przełamanie pętli (break)
+  │     └── Tura komputera (turaKomputera) -> zmniejszenie statkiGracza przy trafieniu
+  │
+  └── 4. Wyświetlenie komunikatu końcowego (Wygrana / Przegrana)
+[Koniec]
+
+6. Kompilacja i uruchomienie
+Kompilacja (GCC / g++)
+g++ -std=c++11 main.cpp -o statki
+
+Uruchomienie
+ * Linux / macOS:
+   ./statki
+
+ * Windows (PowerShell / CMD):
+   statki.exe
+
+7. Możliwości rozwoju projektu
+ * Wielomasztowce: Wprowadzenie statków zajmujących 2 lub 3 pola umieszczanych pionowo/poziomo.
+ * Ulepszona sztuczna inteligencja: Zmiana losowego strzelania komputera na algorytm pamiętający ostatnie trafienie i przeszukujący sąsiednie pola.
+ * Menu główne: Dodanie opcji wyboru rozmiaru planszy oraz liczby statków przed rozpoczęciem gry.
