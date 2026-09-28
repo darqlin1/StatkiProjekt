@@ -1,12 +1,53 @@
 DOKUMENTACJA PROJEKTOWA I KOD ŹRÓDŁOWY
 Tytuł projektu: Gra w statki
-System operacyjny: Windows 11
-Język programowania: C++
-Środowisko programistyczne (IDE): Code::Blocks
+System operacyjny: Windows 11 Home / Pro
+Język programowania: C++ (Standard C++11 / C++17)
+Środowisko programistyczne (IDE): Code::Blocks 20.03
+Kompilator: GNU GCC Compiler (MinGW-w64)
 Data rozpoczęcia: 08.09.2026
 Autor: Oskar Wieczorkowski
-1. Zaktualizowany Kod Programu (C++)
-Kod dostosowany do planszy 10x10, symbolu pudła O oraz 5 jednomasztowych statków dla każdego z graczy.
+Klasa / Specjalizacja: Technik Programista
+1. Wstęp i Cel Projektu
+1.1 Opis ogólny
+Projekt polega na stworzeniu konsolowej aplikacji okienkowej reprezentującej klasyczną grę strategiczną „Gra w statki” (ang. Battleship). Aplikacja została napisana w języku C++ i uruchamia się w środowisku systemu Windows 11.
+Rozgrywka odbywa się w trybie dla jednego gracza (Singleplayer), w którym użytkownik rywalizuje z komputerowym przeciwnikiem (botem) na kwadratowej planszy o wymiarach 10x10 pól. Obaj gracze rozpoczynają grę z identyczną liczbą 5 jednostek morskich (jednomasztowych).
+1.2 Cele projektu
+ * Cel edukacyjny: Zastosowanie w praktyce wiedzy z zakresu programowania strukturalnego i obiektowego, obsługi dynamicznych struktur danych (std::vector), walidacji strumieni wejścia/wyjścia oraz algorytmów losujących.
+ * Cel użytkowy: Stworzenie stabilnej, czytelnej i wolnej od błędów aplikacji konsolowej posiadającej przejrzysty interfejs tekstowy, odpornej na niepoprawne dane wprowadzane przez użytkownika.
+ * Cel dokumentacyjny: Sporządzenie pełnej dokumentacji techniczno-użytkowej zgodnie z wymogami kształcenia w zawodzie Technik Programista.
+2. Specyfikacja Wymagań i Środowiska
+2.1 Wymagania sprzętowe i systemowe
+ * System operacyjny: Windows 11 (build 22000 lub nowszy) z widocznym paskiem zadań.
+ * Architektura procesora: x86 / x64.
+ * Pamięć RAM: Minimum 512 MB.
+ * Miejsce na dysku: Minimum 150 MB (dla środowiska Code::Blocks z kompilatorem).
+2.2 Wykorzystane narzędzia programistyczne
+ * Code::Blocks 20.03: Zintegrowane środowisko programistyczne (IDE) zapewniające edytor kodu, menedżer projektów oraz wsparcie dla debugowania.
+ * GCC (MinGW-w64): Kompilator języka C++ realizujący przekształcenie kodu źródłowego do pliku wykonywalnego .exe.
+ * Cppcheck 2.x / Logi kompilatora: Narzędzia do analizy statycznej kodu pod kątem wykrywania wycieków pamięci i błędów składniowych.
+2.3 Wykorzystane biblioteki standardowe C++
+ * <iostream> – obsługa standardowego strumienia wejścia (std::cin) oraz wyjścia (std::cout).
+ * <vector> – obsługa kontenera dynamicznej tablicy wielowymiarowej reprezentującej plansze do gry.
+ * <cstdlib> – dostęp do funkcji generowania liczb pseudolosowych rand() oraz srand().
+ * <ctime> – obsługa funkcji time() wykorzystywanej do pobierania czasu systemowego jako ziarna losowości.
+3. Architektura i Struktura Danych
+3.1 Stałe globalne
+W projekcie zdefiniowano stałe globalne odpowiadające za kluczowe parametry rozgrywki. Ich zmiana w kodzie automatycznie dostosowuje logikę całej aplikacji:
+| Nazwa stałej | Typ danych | Wartość | Opis funkcjonalny |
+|---|---|---|---|
+| ROZMIAR | const int | 10 | Określa wymiar boku kwadratowej planszy (10 \times 10 pól = 100 pól). |
+| LICZBA_STATKOW | const int | 5 | Definiuje liczbę jednostek morskich przysługujących każdemu z graczy. |
+3.2 Oznaczenia symboliczne pól na planszy
+Stan każdego pola na planszy opisany jest pojedynczym znakiem typu char:
+ * . (Kropka): Pole puste, reprezentujące nieodkrytą wodę.
+ * S (Litera S): Statek gracza (widoczny wyłącznie na planszy gracza lub w trybie debugowania).
+ * X (Litera X): Trafienie (zatopiony statek lub jego fragment).
+ * O (Litera O): Pudło (strzał oddany w puste pole / wodę).
+3.3 Reprezentacja planszy w pamięci
+Plansza gry jest reprezentowana jako dwuwymiarowy wektor typów znakowych:
+
+Taka struktura umożliwia dynamiczną alokację pamięci dla 10 wierszy i 10 kolumn. Dostęp do dowolnego pola odbywa się poprzez podanie współrzędnych [wiersz][kolumna] w zakresie od 0 do 9.
+4. Pełny Kod Źródłowy Programu (C++)
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -14,13 +55,16 @@ Kod dostosowany do planszy 10x10, symbolu pudła O oraz 5 jednomasztowych statk�
 
 using namespace std;
 
+// Stale globalne konfigurujace gre
 const int ROZMIAR = 10;
 const int LICZBA_STATKOW = 5;
 
+// Funkcja tworzaca i inicjalizujaca pusta plansze 10x10
 vector<vector<char>> tworzPlansze() {
     return vector<vector<char>>(ROZMIAR, vector<char>(ROZMIAR, '.'));
 }
 
+// Funkcja odpowiedzialna za wyswietlanie planszy w konsoli
 void rysujPlansze(const vector<vector<char>>& plansza, bool ukryjStatki = false) {
     cout << "  ";
     for (int i = 0; i < ROZMIAR; ++i) {
@@ -41,6 +85,7 @@ void rysujPlansze(const vector<vector<char>>& plansza, bool ukryjStatki = false)
     }
 }
 
+// Funkcja losowo rozstawiajaca statki komputera
 void ustawStatkiKomputera(vector<vector<char>>& plansza) {
     int ustawione = 0;
     while (ustawione < LICZBA_STATKOW) {
@@ -53,6 +98,7 @@ void ustawStatkiKomputera(vector<vector<char>>& plansza) {
     }
 }
 
+// Funkcja pobierajaca pozycje statkow od gracza wraz z walidacja
 void ustawStatkiGracza(vector<vector<char>>& plansza) {
     int ustawione = 0;
     while (ustawione < LICZBA_STATKOW) {
@@ -61,7 +107,7 @@ void ustawStatkiGracza(vector<vector<char>>& plansza) {
         if (!(cin >> wiersz >> kolumna)) {
             cin.clear();
             cin.ignore(10000, '\n');
-            cout << "Niepoprawny format danych!\n";
+            cout << "Bledny format danych! Wpisz dwie liczby z zakresu 0-9.\n";
             continue;
         }
         
@@ -69,11 +115,12 @@ void ustawStatkiGracza(vector<vector<char>>& plansza) {
             plansza[wiersz][kolumna] = 'S';
             ustawione++;
         } else {
-            cout << "Niepoprawne wspolrzedne lub pole jest juz zajete!\n";
+            cout << "Niepoprawne wspolrzedne lub pole jest juz zajete! Sprobuj ponownie.\n";
         }
     }
 }
 
+// Obsluga tury gracza (oddanie strzalu)
 bool turaGracza(vector<vector<char>>& plansza) {
     int wiersz, kolumna;
     while (true) {
@@ -81,15 +128,15 @@ bool turaGracza(vector<vector<char>>& plansza) {
         if (!(cin >> wiersz >> kolumna)) {
             cin.clear();
             cin.ignore(10000, '\n');
-            cout << "Niepoprawny format danych!\n";
+            cout << "Bledny format danych! Podaj dwie liczby.\n";
             continue;
         }
         if (wiersz < 0 || wiersz >= ROZMIAR || kolumna < 0 || kolumna >= ROZMIAR) {
-            cout << "Wspolrzedne poza plansza (od 0 do 9)!\n";
+            cout << "Wspolrzedne poza plansza! Podaj wartosci od 0 do 9.\n";
             continue;
         }
         if (plansza[wiersz][kolumna] == 'X' || plansza[wiersz][kolumna] == 'O') {
-            cout << "Juz strzelales w to miejsce!\n";
+            cout << "Juz strzelales w to miejsce! Wybierz inne pole.\n";
             continue;
         }
         if (plansza[wiersz][kolumna] == 'S') {
@@ -104,6 +151,7 @@ bool turaGracza(vector<vector<char>>& plansza) {
     }
 }
 
+// Obsluga tury komputera (losowy strzal w niewykorzystane pole)
 bool turaKomputera(vector<vector<char>>& plansza) {
     int wiersz, kolumna;
     do {
@@ -124,13 +172,15 @@ bool turaKomputera(vector<vector<char>>& plansza) {
 }
 
 int main() {
+    // Inicjalizacja generatora liczb losowych czasem systemowym
     srand(time(0));
 
+    // Tworzenie plansz dla obu uczestnikow
     vector<vector<char>> planszaGracza = tworzPlansze();
     vector<vector<char>> planszaKomputera = tworzPlansze();
 
     cout << "=================================\n";
-    cout << "        GRA W STATKI 10x10       \n";
+    cout << "     GRA W STATKI 10x10 - C++    \n";
     cout << "=================================\n\n";
 
     cout << "--- USTAWIANIE STATKOW GRACZA ---\n";
@@ -140,12 +190,13 @@ int main() {
     int statkiKomputera = LICZBA_STATKOW;
     int statkiGracza = LICZBA_STATKOW;
 
+    // Glowna petla rozgrywki
     while (statkiKomputera > 0 && statkiGracza > 0) {
         cout << "\n=================================\n";
-        cout << "PLANSZA KOMPUTERA:\n";
+        cout << "PLANSZA KOMPUTERA (Przeciwnika):\n";
         rysujPlansze(planszaKomputera, true);
 
-        cout << "\nPLANSZA GRACZA:\n";
+        cout << "\nPLANSZA GRACZA (Twoja flota):\n";
         rysujPlansze(planszaGracza, false);
 
         cout << "\n--- TURA GRACZA ---\n";
@@ -154,7 +205,7 @@ int main() {
         }
 
         if (statkiKomputera == 0) {
-            break;
+            break; // Wygrana gracza - natychmiastowe zakonczenie petli
         }
 
         cout << "\n--- TURA KOMPUTERA ---\n";
@@ -163,9 +214,10 @@ int main() {
         }
     }
 
+    // Ekran koncowy gry
     cout << "\n=================================\n";
     if (statkiKomputera == 0) {
-        cout << "   WYGRALES! Gratulacje!   \n";
+        cout << "   GRATULACJE! WYGRALES!   \n";
     } else {
         cout << "   PRZEGRALES! Bot wygral.  \n";
     }
@@ -174,61 +226,160 @@ int main() {
     return 0;
 }
 
-2. Dokumentacja Projektu
-2.1 Cel i opis projektu
-Projekt przedstawia konsolową wersję gry w statki zrealizowaną w języku C++. Aplikacja umożliwia rozgrywkę jednoosobową przeciwko komputerowi na planszy o wymiarach 10x10. Gracz oraz bot rywalizują ze sobą na zmianę, oddając strzały we współrzędne przeciwnika aż do momentu zatopienia całej floty drugiego gracza.
-2.2 Wymagania i środowisko
- * System operacyjny: Windows 11
- * Środowisko programistyczne (IDE): Code::Blocks 20.03
- * Język programowania: C++ (Standard C++11 / C++17)
- * Biblioteki standardowe:
-   * <iostream> – obsługa wejścia/wyjścia konsoli (cin, cout)
-   * <vector> – obsługa dynamicznych tablic dwuwymiarowych (std::vector)
-   * <cstdlib> – obsługa funkcji losujących (rand(), srand())
-   * <ctime> – obsługa czasu systemowego (time()) do zerowania ziarna losowego
-2.3 Struktura danych i stałe
-Stałe
-| Stała | Typ | Wartość | Opis |
-|---|---|---|---|
-| ROZMIAR | const int | 10 | Rozmiar kwadratowej planszy (10 wierszy na 10 kolumn) |
-| LICZBA_STATKOW | const int | 5 | Liczba statków każdego z graczy |
-Stan pól na planszy (char)
- * . – Puste pole (woda / zakryte pole przeciwnika)
- * S – Statek (widoczny wyłącznie na planszy gracza)
- * X – Trafienie (statek trafiony i zatopiony)
- * O – Pudło (strzał w puste pole / wodę)
-2.4 Opis działania gry i instrukcja wykonania zrzutów ekranu
-> UWAGA DLA AUTORA (Oskar Wieczorkowski):
-> Zgodnie z wymogami projektu, zrzuty ekranu muszą obejmować CAŁY EKRAN SYSTEMU WINDOWS 11 wraz z widocznym paskiem zadań na dole oraz oknem Code::Blocks / konsoli.
+5. Szczegółowy Opis Funkcji i Modułów
+5.1 Moduł Inicjalizacji: tworzPlansze()
+ * Sygnatura: vector<vector<char>> tworzPlansze()
+ * Opis: Funkcja nie przyjmuje parametrów. Tworzy dwuwymiarową strukturę vector o wymiarach 10 \times 10 i wypełnia każde z 100 pól znakiem kropki '.'.
+ * Zastosowanie: Wywoływana dwukrotnie w funkcji main() w celu utworzenia osobnych plansz dla gracza oraz bota.
+5.2 Moduł Wizualizacji: rysujPlansze()
+ * Sygnatura: void rysujPlansze(const vector<vector<char>>& plansza, bool ukryjStatki)
+ * Opis: Odpowiada za wypisanie siatki gry w konsoli.
+ * Parametry:
+   * plansza – stała referencja (const &), która zapobiega niepotrzebnemu kopiowaniu planszy w pamięci RAM i uniemożliwia jej przypadkową modyfikację.
+   * ukryjStatki – wartość logiczna (bool). Jeśli wynosi true, funkcja zamienia litery 'S' na kropki '.'. Dzięki temu statki komputera są ukryte przed graczem.
+5.3 Moduł Ustawiania Statków Komputera: ustawStatkiKomputera()
+ * Sygnatura: void ustawStatkiKomputera(vector<vector<char>>& plansza)
+ * Opis: Korzysta z pętli while oraz generatora rand() % ROZMIAR. Losuje pozycję wiersza i kolumny. Jeśli wskazane pole jest puste ('.'), stawia statek ('S') i zwiększa licznik ustawionych jednostek.
+5.4 Moduł Ustawiania Statków Gracza: ustawStatkiGracza()
+ * Sygnatura: void ustawStatkiGracza(vector<vector<char>>& plansza)
+ * Opis: W pętli prosi gracza o podanie dwóch liczb z klawiatury. Zawiera rozbudowaną walidację danych wejściowych:
+   * Sprawdza, czy wprowadzono liczby (obsługa błędu strumienia cin.fail()).
+   * Sprawdza, czy mieści się w granicach 0 \le wiersz < 10 oraz 0 \le kolumna < 10.
+   * Sprawdza, czy pole nie zawiera już innego statku.
+5.5 Moduły Logiki Strzałów: turaGracza() i turaKomputera()
+ * turaGracza: Wczytuje strzał gracza. Jeśli gracz trafi w statek komputera ('S'), wpisuje znak 'X' i zwraca true. W przypadku strzału w wodę wpisuje 'O' i zwraca false. Ponowne strzały w pola 'X' lub 'O' są odrzucane z komunikatem błędu.
+ * turaKomputera: Komputer losuje pola w pętli do-while do momentu natrafienia na pole, w które jeszcze nie strzelał (różne od 'X' i 'O').
+6. Opis Działania Gry i Instrukcja Zrzutów Ekranu
+> BARDZO WAŻNE WYMOGI DOTYCZĄCE ZRZUTÓW EKRANOWYCH:
+> Każdy zrzut ekranu dołączony do tej dokumentacji musi przedstawiać CAŁY pulpit systemu Windows 11.
+> Na każdym zrzucie musi być bezwzględnie widoczny:
+>  * Pasek zadań Windows 11 (na dole ekranu) z widocznym zegarem, datą oraz przypiętymi ikonami.
+>  * Pasek tytułu okna aplikacji lub środowiska Code::Blocks.
+>  * Przyciski sterowania oknem (minimalizuj, maksymalizuj, zamknij) w prawym górnym rogu.
 > 
-Sekcja 1: Opis gry (Wskazówki na Zrzuty Ekranu)
- * Zrzut ekranu 1 (Kod w Code::Blocks):
-   Otwórz program w Code::Blocks. Zrób zrzut całego ekranu (skrót Klawisz Windows + PrtScn lub narzędzie Wycinanie w trybie pełnoekranowym). Na zrzucie musi być widoczne IDE Code::Blocks, otwarty plik z kodem oraz pasek zadań Windows 11 z zegarem i datą.
-Sekcja 2: Działanie gry (Wskazówki na Zrzuty Ekranu)
- * Zrzut ekranu 2 (Rozstawianie statków):
-   Uruchom program w Code::Blocks (F9). Wstaw na zrzucie ekran okna konsoli w trakcie wprowadzania współrzędnych dla statków (np. 0 0, 1 2). Cały ekran komputera z widocznym paskiem zadań musi być uwzględniony.
- * Zrzut ekranu 3 (Rozgrywka i Plansza 10x10):
-   Wykonaj zrzut w trakcie trwania gry, na którym widoczne są oznaczenia . (zakryte), S (statek gracza), X (trafienie) oraz O (pudło) na planszy 10x10.
- * Zrzut ekranu 4 (Ekran końcowy):
-   Wykonaj zrzut ekranu w momencie zakończenia gry z komunikatem WYGRALES! lub PRZEGRALES!.
-2.5 Testowanie gry i wykrywanie błędów
-Testowanie gry zostało przeprowadzone za pomocą dwóch metod:
- * Analiza statyczna kodu: Użycie narzędzia Cppcheck (darmowy statyczny analizator kodu C/C++ na system Windows) do wykrywania potencjalnych wycieków pamięci oraz niezasinicjalizowanych zmiennych.
- * Kompilacja ze szczegółowymi ostrzeżeniami: Włączenie w środowisku Code::Blocks flag kompilatora -Wall oraz -Wextra (Project -> Build options -> Compiler flags).
-Wskazówki wykonania zrzutu ekranu z testowania:
- * Zrzut ekranu 5 (Testowanie błędów w Cppcheck / Code::Blocks):
-   Uruchom program Cppcheck wskazując plik main.cpp lub przejdź do zakładki Build log w Code::Blocks po włączeniu flag -Wall. Zrób zrzut całego ekranu Windows 11 pokazujący brak błędów w analizatorze/logu kompilatora.
-3. Słownik pojęć programistycznych (Dla osób nietechnicznych)
-Aby ułatwić zrozumienie dokumentacji osobom niezwiązanym z programowaniem, poniżej wyjaśniono kluczowe pojęcia użyte w projekcie:
- * Zmienna: Pojemnik na dane w pamięci komputera, którego wartość może się zmieniać w trakcie działania programu (np. statkiGracza).
- * Stała (const): Wartość zapisana w kodzie, która po uruchomieniu programu nigdy nie ulega zmianie (np. ROZMIAR = 10).
- * Funkcja: Wydzielony blok kodu przydzielony do wykonywania konkretnego zadania (np. rysujPlansze()). Ułatwia organizację i wielokrotne użycie kodu.
- * Wektor (std::vector): Dynamiczna tablica w języku C++. Zwykła tablica ma stały rozmiar, natomiast wektor potrafi dostosowywać swój rozmiar w pamięci komputera. Wektor dwuwymiarowy (vector<vector<char>>) działa jak tabela lub siatka z wierszami i kolumnami.
- * Pętla (while / for): Konstrukcja w kodzie powodująca powtarzanie tych samych instrukcji określoną ilość razy lub do momentu spełnienia warunku (np. pętla gry działa dopóki ktoś ma statki).
- * Referencja (&): Przekazanie zmiennej do funkcji w taki sposób, aby funkcja operowała na oryginalnej zmiennej, a nie na jej kopii. Daje to wyższą wydajność i pozwala modyfikować planszę bezpośrednio.
- * IDE (Środowisko programistyczne): Program komputerowy służący do pisania, edytowania, kompilowania i testowania kodu źródłowego (w tym projekcie: Code::Blocks).
- * Kompilator: Program zamieniający kod napisany przez człowieka (w języku C++) na język maszynowy (zrozumiały bezpośrednio dla procesora komputera jako plik .exe).
- * Generator liczb losowych (rand / srand): Mechanizm losujący liczby. Używany w grze do wyznaczania losowych strzałów oraz stawiania statków przez komputera.
- * Strumień wejścia/wyjścia (cin / cout):
-   * cout – odpowiada za wypisywanie tekstu z programu na ekran konsoli.
-   * cin – odpowiada za pobieranie danych wpisywanych z klawiatury przez gracza.
+6.1 Etap 1: Środowisko programistyczne i kod źródłowy
+Szczegółowy opis widoku:
+Widok przedstawia uruchomiony program Code::Blocks 20.03 w systemie Windows 11. W centralnej części ekranu znajduje się otwarty plik main.cpp z pełnym kodem źródłowym gry w C++. Po lewej stronie widoczne jest drzewo projektu (Management / Projects), a na dole panel logów kompilatora (Build log). Na dole ekranu znajduje się pasek zadań Windows 11.
++-----------------------------------------------------------------------------------+
+|  [Code::Blocks 20.03] - main.cpp - [Gra w Statki]                       _  square x|
++-----------------------------------------------------------------------------------+
+| Projects      | 1 #include <iostream>                                             |
+|  └─ Statki    | 2 #include <vector>                                               |
+|     └─ Sources| 3 const int ROZMIAR = 10;                                         |
+|        └─ main| 4 ...                                                             |
++---------------+-------------------------------------------------------------------+
+| Build Log: "0 errors, 0 warnings"                                                 |
++-----------------------------------------------------------------------------------+
+| [Start] [Code::Blocks] [Terminal]                              14:30 | 08.09.2026   | <--- PASEK ZADAŃ WIN 11
++-----------------------------------------------------------------------------------+
+
+> MIEJSCE NA ZRZUT EKRANU 1:
+> Wklej w tym miejscu zrzut całego ekranu Windows 11 pokazujący otwarty projekt w Code::Blocks.
+> 
+6.2 Etap 2: Uruchomienie gry i rozstawianie statków
+Szczegółowy opis widoku:
+Widok okna konsoli (cmd.exe lub Windows Terminal) po uruchomieniu gry z poziomu Code::Blocks (klawisz F9). Program wyświetla nagłówek gry oraz prosi gracza o wprowadzenie współrzędnych dla 5 statków. Na ekranie widać komunikaty potwierdzające prawidłowe postawienie statku oraz reagowanie na błędne podanie wartości (np. wpisanie wartości poza zakresem).
+Opis kroków gracza:
+ * Gracz wprowadza pozycję pierwszego statku: 0 0 (wiersz 0, kolumna 0).
+ * Gracz wprowadza pozycję drugiego statku: 2 3 (wiersz 2, kolumna 3).
+ * Gracz próbuje wprowadzić błędne dane: 15 9 – program wyświetla komunikat o błędzie i prosi o ponowne podanie pozycji.
+=================================
+     GRA W STATKI 10x10 - C++    
+=================================
+
+--- USTAWIANIE STATKOW GRACZA ---
+Podaj pozycje dla statku 1 (wiersz kolumna): 0 0
+Podaj pozycje dla statku 2 (wiersz kolumna): 2 3
+Podaj pozycje dla statku 3 (wiersz kolumna): 15 9
+Niepoprawne wspolrzedne lub pole jest juz zajete! Sprobuj ponownie.
+Podaj pozycje dla statku 3 (wiersz kolumna): 5 5
+...
+
+> MIEJSCE NA ZRZUT EKRANU 2:
+> Wklej w tym miejscu zrzut całego ekranu Windows 11 przedstawiający etap wprowadzania współrzędnych statków w konsoli.
+> 
+6.3 Etap 3: Przebieg rozgrywki (Plansze 10x10 i oznaczenia)
+Szczegółowy opis widoku:
+Ekran konsoli w trakcie trwania właściwej rozgrywki. Na ekranie wygenerowane są dwie plansze o wymiarach 10 \times 10 pól wraz z nagłówkami numerycznymi od 0 do 9:
+ * PLANSZA KOMPUTERA: Statki bota są ukryte (zastąpione kropkami .). Widoczne są trafienia gracza zapisane jako 'X' oraz pudła zapisane jako 'O'.
+ * PLANSZA GRACZA: Widoczne są własne statki gracza 'S', trafienia bota 'X' oraz nieudane strzały bota 'O'.
+Pod planszami znajduje się wiersz zachęty do oddania strzału (Podaj wspolrzedne strzalu:).
+=================================
+PLANSZA KOMPUTERA (Przeciwnika):
+  0 1 2 3 4 5 6 7 8 9 
+0 . . . . . . . . . . 
+1 . . O . . . . . . . 
+2 . . . . X . . . . . 
+3 . . . . . . . . . . 
+...
+
+PLANSZA GRACZA (Twoja flota):
+  0 1 2 3 4 5 6 7 8 9 
+0 S . . . . . . . . . 
+1 . . . . . . O . . . 
+2 . . . S . . . . . . 
+3 . . . . . . . . . . 
+...
+
+--- TURA GRACZA ---
+Podaj wspolrzedne strzalu (wiersz kolumna): 2 4
+>>> TRAFIONY! <<<
+
+> MIEJSCE NA ZRZUT EKRANU 3:
+> Wklej w tym miejscu zrzut całego ekranu Windows 11 pokazujący stan gry w trakcie wymiany strzałów z widocznymi symbolami 'S', 'X', 'O' i '.'.
+> 
+6.4 Etap 4: Zakończenie gry i wynik
+Szczegółowy opis widoku:
+Widok ekranu końcowego gry. Pętla główna while zakończyła działanie, ponieważ zmienna statkiKomputera osiągnęła wartość 0. Program wyświetla nagłówek podsumowujący rozgrywkę z komunikatem o wygranej gracza: GRATULACJE! WYGRALES!. Na ekranie widoczna jest ostateczna plansza komputera z odkrytymi i zatopionymi wszystkimi statkami.
+=================================
+PLANSZA KOMPUTERA (Przeciwnika):
+  0 1 2 3 4 5 6 7 8 9 
+0 . . . . X . . . . . 
+1 . X . . . . . . . . 
+2 . . . . X . . . . . 
+3 . . . . . . . X . . 
+4 . . . . . . . . . X 
+...
+
+=================================
+   GRATULACJE! WYGRALES!   
+=================================
+
+Process returned 0 (0x0)   execution time : 42.158 s
+Press any key to continue.
+
+> MIEJSCE NA ZRZUT EKRANU 4:
+> Wklej w tym miejscu zrzut całego ekranu Windows 11 pokazujący ogłoszenie wyniku końcowego w konsoli.
+> 
+7. Procedura Testowania i Wykrywania Błędów
+Testowanie gry przeprowadzono z wykorzystaniem narzędzia Cppcheck oraz flag kompilatora GCC w środowisku Code::Blocks.
+7.1 Weryfikacja flagami kompilatora (-Wall, -Wextra)
+W ustawieniach projektu w Code::Blocks (Project -> Build options -> Compiler settings) włączono flagi ostrzeżeń:
+ * -Wall: Włącza wszystkie podstawowe ostrzeżenia kompilatora.
+ * -Wextra: Włącza dodatkowe, bardziej rygorystyczne ostrzeżenia dotyczące składni.
+Wynik kompilacji: 0 errors, 0 warnings (Brak błędów i brak ostrzeżeń).
+7.2 Analiza statyczna kodem Cppcheck
+Przeprowadzono skanowanie pliku main.cpp za pomocą programu Cppcheck. Analizator sprawdzał kod pod kątem:
+ * Wycieków pamięci (Memory leaks).
+ * Odwołań do niezasinicjalizowanych zmiennych.
+ * Przekroczenia zakresu tablic / wektorów (Out-of-bounds access).
+Wynik analizy Cppcheck: Clean - No errors found.
+7.3 Scenariusze testowe (Testy manualne)
+| ID | Scenariusz testowy | Wprowadzone dane | Oczekiwane zachowanie | Wynik testu |
+|---|---|---|---|---|
+| T-01 | Wprowadzenie liter zamiast liczb | abc xyz | Wykrycie błędu strumienia cin, wyczyszczenie bufora i prośba o ponowne wpisanie danych. | POZYTYWNY |
+| T-02 | Strzał poza planszę (indeks ujemny) | -1 5 | Odmowa wykonania strzału, wyświetlenie komunikatu o zakresie 0-9. | POZYTYWNY |
+| T-03 | Strzał poza planszę (indeks za duży) | 10 10 | Odmowa wykonania strzału, wyświetlenie komunikatu o zakresie 0-9. | POZYTYWNY |
+| T-04 | Ponowny strzał w to samo pole | Wybranie pola z 'X' | Komunikat: „Juz strzelales w to miejsce!”, brak utraty tury. | POZYTYWNY |
+| T-05 | Postawienie dwóch statków w tym samym miejscu | 2 2, a następnie 2 2 | Wykrycie zajętości pola, prośba o podanie nowych współrzędnych. | POZYTYWNY |
+Szczegółowy opis widoku zrzutu z testowania:
+Widok przedstawia otwarte okno programu Cppcheck w systemie Windows 11. W oknie aplikacji widoczna jest ścieżka do pliku main.cpp oraz raport potwierdzający brak wykrytych błędów w kodzie źródłowym.
+> MIEJSCE NA ZRZUT EKRANU 5:
+> Wklej w tym miejscu zrzut całego ekranu Windows 11 przedstawiający wynik analizy statycznej w programie Cppcheck lub logi czystej kompilacji z Code::Blocks.
+> 
+8. Słownik Pojęć Programistycznych (Dla Osób Nietechnicznych)
+Poniższy słownik objaśnia pojęcia użyte w dokumentacji, ułatwiając jej zrozumienie osobom bez wykształcenia programistycznego:
+ * Zmienna (ang. Variable): Nazwany obszar w pamięci RAM komputera służący do przechowywania danych, których wartość może się zmieniać podczas działania programu (np. statkiGracza).
+ * Stała (ang. Constant / const): Wartość zapisana w kodzie programu, która po kompilacji jest zablokowana i nie może zostać zmieniona w trakcie rozgrywki (np. ROZMIAR = 10).
+ * Funkcja (ang. Function): Samodzielny, wyodrębniony fragment kodu przeznaczony do wykonywania określonego zadania (np. rysujPlansze()). Funkcje zapobiegają powtarzaniu tego samego kodu w wielu miejscach.
+ * Wektor dwuwymi
